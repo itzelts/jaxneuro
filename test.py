@@ -22,3 +22,9 @@ _ = ax[1].plot(time_vec, v[1])
 _ = ax[0].set_ylabel("Voltage (mV)")
 _ = ax[1].set_ylabel("Spikes")
 _ = ax[1].set_xlabel("Time (ms)")
+
+print("Recordings registry (name -> index in integrate() output):")
+print(cell.recordings)            # likely a dict-like mapping
+
+print("\nExternals registry:")
+print(cell.externals)             # typically a dict of external inputs
