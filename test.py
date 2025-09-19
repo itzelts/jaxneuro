@@ -1,33 +1,24 @@
-import jaxley as jx
-from jaxley.channels import Na, K, Leak
 import matplotlib.pyplot as plt
+import jax.numpy as jnp
 
+import jaxley as jx
 
-# Build the cell.
-comp = jx.Compartment()
-branch = jx.Branch(comp, ncomp=2)
-cell = jx.Cell(branch, parents=[-1, 0, 0, 1, 1])
-
-# Insert channels.
+from jaxley.channels import Leak, Fire
+cell = jx.Cell()
 cell.insert(Leak())
-cell.branch(0).insert(Na())
-cell.branch(0).insert(K())
+cell.insert(Fire())
+cell.record("v")
+cell.record("Fire_spikes")
 
-# Change parameters.
-cell.set("axial_resistivity", 200.0)
+dt = 0.1
+t_max = 40.0
 
-# Visualize the morphology.
-cell.compute_xyz()
-fig, ax = plt.subplots(1, 1, figsize=(4, 4))
-cell.vis(ax=ax)
-
-# Stimulate.
-current = jx.step_current(i_delay=1.0, i_dur=1.0, i_amp=0.1, delta_t=0.025, t_max=10.0)
-cell.branch(0).loc(0.0).stimulate(current)
-
-# Record.
-cell.branch(0).loc(0.0).record("v")
-
-# Simulate and plot.
-v = jx.integrate(cell, delta_t=0.025)
-plt.plot(v.T)
+cell.stimulate(jx.step_current(5.0, 20.0, 0.005, dt, t_max))
+v = jx.integrate(cell, delta_t=dt)
+time_vec = jnp.arange(0, t_max + 2 * dt, dt)
+fig, ax = plt.subplots(2, 1, figsize=(6, 4))
+_ = ax[0].plot(time_vec, v[0])
+_ = ax[1].plot(time_vec, v[1])
+_ = ax[0].set_ylabel("Voltage (mV)")
+_ = ax[1].set_ylabel("Spikes")
+_ = ax[1].set_xlabel("Time (ms)")
